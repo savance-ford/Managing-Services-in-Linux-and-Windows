@@ -420,3 +420,63 @@ D [18/Jun/2024:09:02:22 +0000] Report: stringpool-string-count=329
 D [18/Jun/2024:09:02:22 +0000] Report: stringpool-alloc-bytes=5112
 D [18/Jun/2024:09:02:22 +0000] Report: stringpool-total-bytes=5584
 ```
+
+## Reloading Services
+
+Finally, let's look at the reload action. Take this action when you want a service to re-read its configuration without actually doing a full stop and start.
+
+Let's return the cups log level back to its default. One more time, let's edit ``/etc/cups/cupsd.conf`` using the nano editor.
+
+```
+sudo nano /etc/cups/cupsd.conf
+```
+
+Let's change ``LogLevel debug``, replacing <b>debug</b> with <b>warn</b>:
+
+
+
+```
+#
+# Configuration file for the CUPS scheduler.  See "man cupsd.conf" for a
+# complete description of this file.
+#
+ 
+# Log general information in error_log - change "warn" to "debug"
+# for troubleshooting...
+LogLevel warn
+PageLogFormat
+ 
+# Deactivate CUPS' internal logrotating, as we provide a better one, especially
+# LogLevel debug2 gets usable now
+MaxLogSize 0
+```
+
+Once you've done this, press <b>"Ctrl-X"</b> to exit the editor. It will ask you if you want to save your changes, press <b>"Y"</b> for yes and then <b>enter</b> at the filename prompt.
+
+Once we've done this, we can reload cups:
+
+
+```
+sudo service cups reload
+```
+
+OUTPUT:
+
+```
+Reloading Common Unix Printing System: cupsd.
+```
+
+If you check the status of the service, you'll see that it was not restarted (it's been running since we last restarted it).
+
+```
+sudo service cups status
+```
+
+OUTPUT:
+
+```
+cupsd is running.
+```
+
+
+By using the reload action, we caused the service to re-read its configuration without being stopped at any point
