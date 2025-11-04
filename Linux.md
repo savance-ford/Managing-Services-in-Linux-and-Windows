@@ -221,3 +221,111 @@ Jun 18 08:52:38 93431e170ddb rsyslogd: activation of module imklog failed [v8.19
 Jun 18 08:52:38 93431e170ddb rsyslogd:  [origin software="rsyslogd" swVersion="8.1901.0" x-pid="3326" x-info="https://www.rsyslog.com"] start
 Jun 18 08:53:03 93431e170ddbc student: This is another test log entry
 ```
+
+## Fixing a failing service
+
+In order to list the state of services controlled by ``System V``, you can use the following command:
+
+```
+sudo service --status-all
+```
+
+OUTPUT: 
+
+```
+ [ - ]  avahi-daemon
+ [ - ]  cron
+ [ - ]  cups
+ [ - ]  cups-browsed
+ [ - ]  dbus
+ [ - ]  exim4
+ [ ? ]  hwclock.sh
+ [ - ]  procps
+ [ + ]  rsyslog
+ [ - ]  saned
+ [ + ]  ssh
+ [ - ]  sudo
+ [ + ]  udev
+ ```
+
+ Here you will find ``-`` with the ``cups`` service, which means it is inactive/stopped. This is the service used to manage printers on Linux systems. We can get more information about this service by checking the status:
+
+
+ ```
+ sudo service cups status
+ ```
+
+ Output:
+
+```
+cupsd is not running ... failed!
+```
+
+We see here that the ``cups`` service is in a failed state. So, let's look at the contents of that directory:
+
+```
+sudo ls -l /etc/cups
+```
+
+OUTPUT:
+```
+total 64
+-rw-r--r-- 1 root root 27303 May 19  2023 cups-browsed.conf
+-rw-r--r-- 1 root root  2923 Jun 11 20:16 cups-files.conf
+-rw-r--r-- 1 root root  6496 Jun 18 08:32 cupsd.conf.old
+drwxr-xr-x 2 root root  4096 Jun 11 20:16 interfaces
+drwxr-xr-x 2 root root  4096 Jun 11 20:16 ppd
+-rw-r--r-- 1 root root   240 Jun 18 08:31 raw.convs
+-rw-r--r-- 1 root root   211 Jun 18 08:31 raw.types
+-rw-r--r-- 1 root root   142 Jun 11 20:16 snmp.conf
+drwxr-xr-x 2 root root  4096 Jun 11 20:16 ssl
+```
+
+There's no ``cupsd.conf``, but there is ``cupsd.conf.old``. Apparently the configuration file was deleted. Good thing we kept a copy! Let's move that file so that cups can find it and start successfully:
+
+```
+sudo mv /etc/cups/cupsd.conf.old /etc/cups/cupsd.conf
+```
+
+As with the other commands, we get no output after executing this. We can run ls again to see that the file was renamed correctly:
+
+
+```
+sudo ls -l /etc/cups
+```
+
+OUTPUT:
+
+```
+total 64
+-rw-r--r-- 1 root root 27303 May 19  2023 cups-browsed.conf
+-rw-r--r-- 1 root root  2923 Jun 11 20:16 cups-files.conf
+-rw-r--r-- 1 root root  6496 Jun 18 08:32 cupsd.conf
+drwxr-xr-x 2 root root  4096 Jun 11 20:16 interfaces
+drwxr-xr-x 2 root root  4096 Jun 11 20:16 ppd
+-rw-r--r-- 1 root root   240 Jun 18 08:31 raw.convs
+-rw-r--r-- 1 root root   211 Jun 18 08:31 raw.types
+-rw-r--r-- 1 root root   142 Jun 11 20:16 snmp.conf
+drwxr-xr-x 2 root root  4096 Jun 11 20:16 ssl
+```
+
+Now that the file was renamed successfully, we can start cups:
+
+```
+sudo service cups start
+```
+
+And then check the status:
+
+
+```
+sudo service cups status
+```
+
+OUTPUT:
+
+```
+cupsd is running.
+```
+We've fixed it!
+
