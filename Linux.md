@@ -480,3 +480,8 @@ cupsd is running.
 
 
 By using the reload action, we caused the service to re-read its configuration without being stopped at any point
+
+## Conclusion
+Congrats! You've successfully listed all the services that are running on the machine, practiced stopping and starting some of these services, and queried their status. You also fixed a problem in the service that was failing to start and edited the configuration of another service.
+
+These are important commands and problem-solving skills that you'll use on a daily basis as a system administrator. Keep it up!
